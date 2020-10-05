@@ -6,17 +6,17 @@ angular.module('frapontillo.bootstrap-switch')
       restrict: 'A',
       require: 'ngModel',
       link: function link(scope, element, attrs, controller) {
-        var isInit = false;
+        let isInit = false;
 
         /**
          * Return the true value for this specific checkbox.
          * @returns {Object} representing the true view value; if undefined, returns true.
          */
-        var getTrueValue = function() {
+        const getTrueValue = function () {
           if (attrs.type === 'radio') {
             return attrs.value || $parse(attrs.ngValue)(scope) || true;
           }
-          var trueValue = ($parse(attrs.ngTrueValue)(scope));
+          let trueValue = ($parse(attrs.ngTrueValue)(scope));
           if (angular.isUndefined(trueValue)) {
             trueValue = true;
           }
@@ -28,7 +28,7 @@ angular.module('frapontillo.bootstrap-switch')
          * @param value The input object
          * @returns {boolean} A boolean value
          */
-        var getBooleanFromString = function(value) {
+        const getBooleanFromString = function (value) {
           return scope.$eval(value) === true;
         };
 
@@ -37,7 +37,7 @@ angular.module('frapontillo.bootstrap-switch')
          * @param value The input object
          * @returns {boolean} A boolean value
          */
-        var getBooleanFromStringDefTrue = function(value) {
+        const getBooleanFromStringDefTrue = function (value) {
           return (value === true || value === 'true' || !value);
         };
 
@@ -47,7 +47,7 @@ angular.module('frapontillo.bootstrap-switch')
          * @param value The value to check.
          * @returns the original value if it is truthy, {@link undefined} otherwise.
          */
-        var getValueOrUndefined = function (value) {
+        const getValueOrUndefined = function (value) {
           return (value ? value : undefined);
         };
 
@@ -57,7 +57,7 @@ angular.module('frapontillo.bootstrap-switch')
          * @param value The string expression
          * @return a function that evaluates the expression
          */
-        var getExprFromString = function (value) {
+        const getExprFromString = function (value) {
           if (angular.isUndefined(value)) {
             return angular.noop;
           }
@@ -73,29 +73,29 @@ angular.module('frapontillo.bootstrap-switch')
          * @param attrName  The angular-bound attribute name to get the value for
          * @returns {*}     The attribute value
          */
-        var getSwitchAttrValue = function(attrName) {
-          var map = {
+        const getSwitchAttrValue = function(attrName) {
+          const map = {
             'switchRadioOff': getBooleanFromStringDefTrue,
-            'switchActive': function(value) {
+            'switchActive': function (value) {
               return !getBooleanFromStringDefTrue(value);
             },
             'switchAnimate': getBooleanFromStringDefTrue,
-            'switchLabel': function(value) {
+            'switchLabel': function (value) {
               return value ? value : '&nbsp;';
             },
-            'switchIcon': function(value) {
+            'switchIcon': function (value) {
               if (value) {
                 return '<span class=\'' + value + '\'></span>';
               }
             },
-            'switchWrapper': function(value) {
+            'switchWrapper': function (value) {
               return value || 'wrapper';
             },
             'switchInverse': getBooleanFromString,
             'switchReadonly': getBooleanFromString,
             'switchChange': getExprFromString
           };
-          var transFn = map[attrName] || getValueOrUndefined;
+          const transFn = map[attrName] || getValueOrUndefined;
           return transFn(attrs[attrName]);
         };
 
@@ -108,25 +108,25 @@ angular.module('frapontillo.bootstrap-switch')
          * @param attr      The name of the switch parameter
          * @param modelAttr The name of the angular-bound parameter
          */
-        var setSwitchParamMaybe = function(element, attr, modelAttr) {
+        const setSwitchParamMaybe = function (element, attr, modelAttr) {
           if (!isInit) {
             return;
           }
-          var newValue = getSwitchAttrValue(modelAttr);
+          const newValue = getSwitchAttrValue(modelAttr);
           element.bootstrapSwitch(attr, newValue);
         };
 
-        var setActive = function() {
+        const setActive = function () {
           setSwitchParamMaybe(element, 'disabled', 'switchActive');
         };
 
         /**
          * If the directive has not been initialized yet, do so.
          */
-        var initMaybe = function() {
+        const initMaybe = function () {
           // if it's the first initialization
           if (!isInit) {
-            var viewValue = (controller.$modelValue === getTrueValue());
+            const viewValue = (controller.$modelValue === getTrueValue());
             isInit = !isInit;
             // Bootstrap the switch plugin
             element.bootstrapSwitch({
@@ -150,26 +150,23 @@ angular.module('frapontillo.bootstrap-switch')
               controller.$setViewValue(controller.$modelValue);
             } else {
               controller.$setViewValue(viewValue);
-              controller.$formatters[0] = function(value) {
-                if (value === undefined || value === null) {
-                  return value;
-                }
+              controller.$formatters[0] = function (value) {
                 return angular.equals(value, getTrueValue());
               };
             }
           }
         };
 
-        var switchChange = getSwitchAttrValue('switchChange');
+        const switchChange = getSwitchAttrValue('switchChange');
 
         /**
          * Listen to model changes.
          */
-        var listenToModel = function () {
+        const listenToModel = function () {
 
           attrs.$observe('switchActive', function (newValue) {
 
-            var active = getBooleanFromStringDefTrue(newValue);
+            const active = getBooleanFromStringDefTrue(newValue);
             // if we are disabling the switch, delay the deactivation so that the toggle can be switched
             if (!active) {
               $timeout(setActive);
@@ -188,7 +185,7 @@ angular.module('frapontillo.bootstrap-switch')
             // re-enable it and only then update 'state'
             element.bootstrapSwitch('disabled', '');
 
-            var newValue = controller.$modelValue;
+            const newValue = controller.$modelValue;
             if (newValue !== undefined && newValue !== null) {
               element.bootstrapSwitch('state', newValue === getTrueValue(), true);
             } else {
@@ -203,7 +200,7 @@ angular.module('frapontillo.bootstrap-switch')
           };
 
           // angular attribute to switch property bindings
-          var bindings = {
+          const bindings = {
             'switchRadioOff': 'radioAllOff',
             'switchOnText': 'onText',
             'switchOffText': 'offText',
@@ -220,8 +217,8 @@ angular.module('frapontillo.bootstrap-switch')
             'switchReadonly': 'readonly'
           };
 
-          var observeProp = function(prop, bindings) {
-            return function() {
+          const observeProp = function (prop, bindings) {
+            return function () {
               attrs.$observe(prop, function () {
                 setSwitchParamMaybe(element, bindings[prop], prop);
               });
@@ -229,7 +226,7 @@ angular.module('frapontillo.bootstrap-switch')
           };
 
           // for every angular-bound attribute, observe it and trigger the appropriate switch function
-          for (var prop in bindings) {
+          for (const prop in bindings) {
             attrs.$observe(prop, observeProp(prop, bindings));
           }
         };
@@ -237,7 +234,7 @@ angular.module('frapontillo.bootstrap-switch')
         /**
          * Listen to view changes.
          */
-        var listenToView = function () {
+        const listenToView = function () {
 
           if (attrs.type === 'radio') {
             // when the switch is clicked
