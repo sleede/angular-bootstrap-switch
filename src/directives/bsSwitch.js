@@ -151,6 +151,9 @@ angular.module('frapontillo.bootstrap-switch')
             } else {
               controller.$setViewValue(viewValue);
               controller.$formatters[0] = function (value) {
+                if (value === undefined || value === null) {
+                  return value;
+                }
                 return angular.equals(value, getTrueValue());
               };
             }
@@ -186,12 +189,7 @@ angular.module('frapontillo.bootstrap-switch')
             element.bootstrapSwitch('disabled', '');
 
             const newValue = controller.$modelValue;
-            if (newValue !== undefined && newValue !== null) {
-              element.bootstrapSwitch('state', newValue === getTrueValue(), true);
-            } else {
-              element.bootstrapSwitch('indeterminate', true, true);
-              controller.$setViewValue(undefined);
-            }
+            element.bootstrapSwitch('state', newValue === getTrueValue(), true);
 
             // return initial value for "disabled"
             setActive();
