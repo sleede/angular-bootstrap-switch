@@ -1,6 +1,6 @@
 /**
  * angular-bootstrap-switch
- * @version v0.5.2 - 2017-04-19
+ * @version v0.5.2 - 2020-10-05
  * @author Francesco Pontillo (francescopontillo@gmail.com)
  * @link https://github.com/frapontillo/angular-bootstrap-switch
  * @license Apache License 2.0(http://www.apache.org/licenses/LICENSE-2.0.html)
@@ -25,7 +25,7 @@ angular.module('frapontillo.bootstrap-switch')
          * Return the true value for this specific checkbox.
          * @returns {Object} representing the true view value; if undefined, returns true.
          */
-        var getTrueValue = function() {
+        var getTrueValue = function () {
           if (attrs.type === 'radio') {
             return attrs.value || $parse(attrs.ngValue)(scope) || true;
           }
@@ -41,7 +41,7 @@ angular.module('frapontillo.bootstrap-switch')
          * @param value The input object
          * @returns {boolean} A boolean value
          */
-        var getBooleanFromString = function(value) {
+        var getBooleanFromString = function (value) {
           return scope.$eval(value) === true;
         };
 
@@ -50,7 +50,7 @@ angular.module('frapontillo.bootstrap-switch')
          * @param value The input object
          * @returns {boolean} A boolean value
          */
-        var getBooleanFromStringDefTrue = function(value) {
+        var getBooleanFromStringDefTrue = function (value) {
           return (value === true || value === 'true' || !value);
         };
 
@@ -89,19 +89,19 @@ angular.module('frapontillo.bootstrap-switch')
         var getSwitchAttrValue = function(attrName) {
           var map = {
             'switchRadioOff': getBooleanFromStringDefTrue,
-            'switchActive': function(value) {
+            'switchActive': function (value) {
               return !getBooleanFromStringDefTrue(value);
             },
             'switchAnimate': getBooleanFromStringDefTrue,
-            'switchLabel': function(value) {
+            'switchLabel': function (value) {
               return value ? value : '&nbsp;';
             },
-            'switchIcon': function(value) {
+            'switchIcon': function (value) {
               if (value) {
                 return '<span class=\'' + value + '\'></span>';
               }
             },
-            'switchWrapper': function(value) {
+            'switchWrapper': function (value) {
               return value || 'wrapper';
             },
             'switchInverse': getBooleanFromString,
@@ -121,7 +121,7 @@ angular.module('frapontillo.bootstrap-switch')
          * @param attr      The name of the switch parameter
          * @param modelAttr The name of the angular-bound parameter
          */
-        var setSwitchParamMaybe = function(element, attr, modelAttr) {
+        var setSwitchParamMaybe = function (element, attr, modelAttr) {
           if (!isInit) {
             return;
           }
@@ -129,14 +129,14 @@ angular.module('frapontillo.bootstrap-switch')
           element.bootstrapSwitch(attr, newValue);
         };
 
-        var setActive = function() {
+        var setActive = function () {
           setSwitchParamMaybe(element, 'disabled', 'switchActive');
         };
 
         /**
          * If the directive has not been initialized yet, do so.
          */
-        var initMaybe = function() {
+        var initMaybe = function () {
           // if it's the first initialization
           if (!isInit) {
             var viewValue = (controller.$modelValue === getTrueValue());
@@ -163,6 +163,12 @@ angular.module('frapontillo.bootstrap-switch')
               controller.$setViewValue(controller.$modelValue);
             } else {
               controller.$setViewValue(viewValue);
+              controller.$formatters[0] = function (value) {
+                if (value === undefined || value === null) {
+                  return value;
+                }
+                return angular.equals(value, getTrueValue());
+              };
             }
           }
         };
@@ -189,13 +195,18 @@ angular.module('frapontillo.bootstrap-switch')
           // When the model changes
           controller.$render = function () {
             initMaybe();
+
+            // WORKAROUND for https://github.com/Bttstrp/bootstrap-switch/issues/540
+            // to update model value when bootstrapSwitch is disabled we should
+            // re-enable it and only then update 'state'
+            element.bootstrapSwitch('disabled', '');
+
             var newValue = controller.$modelValue;
-            if (newValue !== undefined && newValue !== null) {
-              element.bootstrapSwitch('state', newValue === getTrueValue(), true);
-            } else {
-              element.bootstrapSwitch('indeterminate', true, true);
-              controller.$setViewValue(undefined);
-            }
+            element.bootstrapSwitch('state', newValue === getTrueValue(), true);
+
+            // return initial value for "disabled"
+            setActive();
+
             switchChange();
           };
 
@@ -217,8 +228,8 @@ angular.module('frapontillo.bootstrap-switch')
             'switchReadonly': 'readonly'
           };
 
-          var observeProp = function(prop, bindings) {
-            return function() {
+          var observeProp = function (prop, bindings) {
+            return function () {
               attrs.$observe(prop, function () {
                 setSwitchParamMaybe(element, bindings[prop], prop);
               });
